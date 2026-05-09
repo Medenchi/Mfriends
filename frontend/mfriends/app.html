@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>App — MFriends</title>
+    <link rel="stylesheet" href="css/styles.css">
+  </head>
+  <body>
+    <div class="app-shell">
+      <header class="topbar">
+        <a class="brand" href="index.html">M<span>Friends</span></a>
+        <nav class="nav"><a href="index.html">LANDING</a></nav>
+        <button id="logout" class="chat-cta">LOGOUT</button>
+      </header>
+
+      <main class="app-layout">
+        <aside class="sidebar panel">
+          <a href="#" data-view="profile" class="active">PROFILE</a>
+          <a href="#" data-view="discover">DISCOVERY</a>
+          <a href="#" data-view="requests">REQUESTS</a>
+          <a href="#" data-view="chat">CHAT</a>
+          <a href="#" data-view="verification">VERIFICATION</a>
+          <a href="#" data-view="settings">SETTINGS</a>
+        </aside>
+
+        <section class="dashboard">
+          <div id="profile" class="view active">
+            <div class="panel">
+              <p class="eyebrow">PROFILE</p>
+              <h2>Your friend graph starts here.</h2>
+              <div id="me-summary"></div>
+            </div>
+            <form id="profile-form" class="panel">
+              <label class="field"><span>Name</span><input id="profile-name" required></label>
+              <label class="field"><span>Bio</span><textarea id="profile-bio" rows="4"></textarea></label>
+              <label class="field"><span>City / remote</span><input id="profile-city"></label>
+              <label class="field"><span>Buddy goals</span><input id="profile-goals" placeholder="gaming, study, coding"></label>
+              <label class="field"><span>Interests</span><input id="profile-interests"></label>
+              <button class="primary" type="submit">SAVE PROFILE</button>
+            </form>
+          </div>
+
+          <div id="discover" class="view">
+            <div class="panel">
+              <p class="eyebrow">PEOPLE DISCOVERY</p>
+              <h2>Find people by goals, city or interests.</h2>
+              <form id="discover-form" class="row">
+                <input id="people-query" placeholder="gaming, python, study, walking">
+                <button class="primary" type="submit">SEARCH</button>
+              </form>
+            </div>
+            <div id="people-list" class="people-list"></div>
+          </div>
+
+          <div id="requests" class="view">
+            <div class="panel">
+              <p class="eyebrow">REQUESTS</p>
+              <h2>Friend and teammate requests.</h2>
+            </div>
+            <div id="request-list" class="request-list"></div>
+          </div>
+
+          <div id="chat" class="view">
+            <div class="panel">
+              <p class="eyebrow">CHAT + VIDEO</p>
+              <h2>Realtime messages and P2P calls.</h2>
+              <div id="chat-list" class="row"></div>
+            </div>
+            <div class="panel chat-box">
+              <div id="messages" class="message-list"></div>
+              <form id="message-form" class="row">
+                <input id="message-body" placeholder="Write a safe message">
+                <button class="primary" type="submit">SEND</button>
+              </form>
+            </div>
+            <div class="panel">
+              <h3>WebRTC call</h3>
+              <p class="notice">STUN is configured. Add TURN credentials in production for strict NATs. Media never travels through the VPS.</p>
+              <div class="row">
+                <input id="call-user-id" type="number" placeholder="Remote user id">
+                <button id="call-start" class="ghost" type="button">START CALL</button>
+              </div>
+              <div class="call-grid">
+                <video id="local-video" autoplay playsinline muted></video>
+                <video id="remote-video" autoplay playsinline></video>
+              </div>
+            </div>
+          </div>
+
+          <div id="verification" class="view">
+            <div class="panel">
+              <p class="eyebrow">VERIFICATION</p>
+              <h2>Selfie, voice code and liveness review.</h2>
+              <p>Production flow stores temporary verification files and queues manual/external checks.</p>
+              <button class="ghost" type="button">START SELFIE CHECK</button>
+              <button class="ghost" type="button">START VOICE CODE</button>
+            </div>
+          </div>
+
+          <div id="settings" class="view">
+            <div class="panel">
+              <p class="eyebrow">SETTINGS</p>
+              <h2>Safety controls.</h2>
+              <label class="field"><span>Discovery visibility</span><select><option>Visible to safe users</option><option>Friends only</option></select></label>
+              <label class="field"><span>Message requests</span><select><option>Moderated requests</option><option>Friends only</option></select></label>
+              <button class="danger" type="button">REPORT SUSPICIOUS ACTIVITY</button>
+            </div>
+          </div>
+        </section>
+      </main>
+    </div>
+    <script src="js/api.js"></script>
+    <script src="js/app.js"></script>
+    <script>bootApp();</script>
+  </body>
+</html>
