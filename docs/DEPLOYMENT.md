@@ -2,12 +2,14 @@
 
 ## Routing
 
-Use a single domain:
+Use a single shared domain. MFriends does not require a subdomain and should not take over `/` if other projects already live on the same VPS:
 
 - `https://malinacode.is-a.dev/mfriends/` → static frontend
 - `https://malinacode.is-a.dev/api/` → FastAPI
 - `wss://malinacode.is-a.dev/ws` → WebSocket chat and WebRTC signaling
 - `https://malinacode.is-a.dev/uploads/` → validated uploads
+
+If the same domain hosts multiple projects, include `deploy/nginx/mfriends.conf` alongside the other project location blocks and keep MFriends limited to these paths.
 
 ## Deploy
 

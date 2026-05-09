@@ -2,6 +2,12 @@
 
 ## Backend modules
 
+Public routing is path-based for a shared `malinacode.is-a.dev` domain:
+
+- `/mfriends/` serves only the MFriends static frontend.
+- `/api/`, `/ws` and `/uploads/` serve the MFriends backend.
+- Other root paths remain available for other projects on the same domain.
+
 - `api/auth.py` — JWT auth, email verification, password reset request
 - `api/profiles.py` — profile CRUD and people discovery
 - `api/requests.py` — friend/teammate requests and chat creation

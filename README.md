@@ -12,6 +12,8 @@ malinacode.is-a.dev
 └── /uploads    protected/static uploaded files
 ```
 
+This is safe for a shared domain with multiple projects because MFriends is scoped to `/mfriends/` and its backend paths. It does not require or reserve additional subdomains.
+
 Dynamic DNS is expected to use:
 
 ```text
