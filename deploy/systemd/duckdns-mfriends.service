@@ -1,0 +1,9 @@
+[Unit]
+Description=Update DuckDNS IP for MFriends
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+EnvironmentFile=/opt/mfriends/.env
+ExecStart=/opt/mfriends/scripts/duckdns-update.sh
