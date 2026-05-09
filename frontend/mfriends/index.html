@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>MFriends — Safe buddy platform</title>
+    <link rel="stylesheet" href="css/styles.css">
+  </head>
+  <body>
+    <div class="app-shell">
+      <header class="topbar">
+        <a class="brand" href="index.html">M<span>Friends</span></a>
+        <nav class="nav">
+          <a href="#features">SAFETY</a>
+          <a href="#buddy">BUDDIES <span class="nav-tag">NEW</span></a>
+          <a href="login.html">LOGIN</a>
+        </nav>
+        <a class="chat-cta" href="register.html">● START NOW</a>
+      </header>
+
+      <main>
+        <section class="hero">
+          <div class="pixel-orb" aria-hidden="true"></div>
+          <div class="hero-content">
+            <div class="eyebrow">SAFE FRIENDSHIP · TEAMMATES · ACTIVITIES</div>
+            <h1>Find trusted friends without dating noise.</h1>
+            <p>MFriends helps people discover gaming buddies, study partners, coding teammates and offline activity friends with verification, trust signals and moderation-first messaging.</p>
+            <div class="hero-actions">
+              <a class="primary" href="register.html">CREATE ACCOUNT</a>
+              <a class="secondary" href="#features">VIEW SAFETY MODEL</a>
+            </div>
+          </div>
+        </section>
+
+        <section id="features" class="section">
+          <h2>Production-ready safety architecture.</h2>
+          <div class="grid">
+            <article class="card">
+              <span class="pill">MODERATION</span>
+              <h3>External AI hooks</h3>
+              <p>Toxicity, scam, spam and harassment checks are provider-neutral and ready for external APIs.</p>
+            </article>
+            <article class="card">
+              <span class="pill">TRUST</span>
+              <h3>Verification states</h3>
+              <p>Selfie, voice code and liveness placeholders keep sensitive review data temporary and auditable.</p>
+            </article>
+            <article class="card">
+              <span class="pill">REALTIME</span>
+              <h3>P2P video calls</h3>
+              <p>WebRTC media goes peer-to-peer. The VPS only handles signaling over secure WebSockets.</p>
+            </article>
+          </div>
+        </section>
+
+        <section id="buddy" class="section">
+          <div class="grid">
+            <div>
+              <p class="eyebrow">NOT A DATING APP</p>
+              <h2>Built for gaming, study, coding and real-world activities.</h2>
+            </div>
+            <div class="card">
+              <p class="mono">/api → FastAPI REST<br>/ws → chat + WebRTC signaling<br>/uploads → secure files<br>/mfriends → static frontend</p>
+              <a class="ghost" href="register.html">JOIN MFRIENDS</a>
+            </div>
+          </div>
+        </section>
+      </main>
+    </div>
+  </body>
+</html>

@@ -1,0 +1,23 @@
+[Unit]
+Description=MFriends FastAPI backend
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=mfriends
+Group=mfriends
+WorkingDirectory=/opt/mfriends/app
+EnvironmentFile=/opt/mfriends/.env
+ExecStart=/opt/mfriends/venv/bin/uvicorn backend.app.main:app --host 127.0.0.1 --port 8000 --workers 1
+Restart=always
+RestartSec=5
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=full
+ProtectHome=true
+ReadWritePaths=/opt/mfriends/data /opt/mfriends/uploads
+MemoryMax=320M
+
+[Install]
+WantedBy=multi-user.target

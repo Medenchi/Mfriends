@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Register — MFriends</title>
+    <link rel="stylesheet" href="css/styles.css">
+  </head>
+  <body>
+    <div class="app-shell">
+      <header class="topbar">
+        <a class="brand" href="index.html">M<span>Friends</span></a>
+        <nav class="nav"><a href="login.html">LOGIN</a></nav>
+      </header>
+      <main class="auth-layout">
+        <form id="register-form" class="form-card">
+          <p class="eyebrow">CREATE SAFE PROFILE</p>
+          <h1>Start finding buddies.</h1>
+          <label class="field">
+            <span>Display name</span>
+            <input name="display_name" minlength="2" maxlength="48" required>
+          </label>
+          <label class="field">
+            <span>Email</span>
+            <input name="email" type="email" autocomplete="email" required>
+          </label>
+          <label class="field">
+            <span>Password</span>
+            <input name="password" type="password" minlength="10" autocomplete="new-password" required>
+          </label>
+          <button class="primary" type="submit">REGISTER</button>
+          <a class="secondary" href="login.html">Already registered?</a>
+        </form>
+      </main>
+    </div>
+    <script src="js/api.js"></script>
+    <script>bindAuthForms();</script>
+  </body>
+</html>

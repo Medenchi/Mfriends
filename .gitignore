@@ -1,0 +1,16 @@
+__pycache__/
+*.py[cod]
+.venv/
+.env
+.env.*
+!.env.example
+data/
+uploads/
+*.sqlite3
+*.db
+.pytest_cache/
+.ruff_cache/
+htmlcov/
+dist/
+node_modules/
+frontend/mfriends/uploads/
