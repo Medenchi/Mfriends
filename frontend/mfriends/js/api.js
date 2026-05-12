@@ -28,7 +28,7 @@ async function api(path, options = {}) {
   });
   const data = await response.json().catch(() => ({}));
   if (!response.ok) {
-    throw new Error(data.detail || "Request failed");
+    throw new Error(data.detail || "Запрос не удался");
   }
   return data;
 }
@@ -45,7 +45,7 @@ async function upload(path, file) {
   });
   const data = await response.json().catch(() => ({}));
   if (!response.ok) {
-    throw new Error(data.detail || "Upload failed");
+    throw new Error(data.detail || "Загрузка не удалась");
   }
   return data;
 }
@@ -86,7 +86,7 @@ function bindAuthForms() {
       event.preventDefault();
       const form = new FormData(resetRequestForm);
       await api("/auth/password-reset/request", { method: "POST", body: JSON.stringify(Object.fromEntries(form.entries())) });
-      document.querySelector("#reset-status").textContent = "If the account exists, an email was sent.";
+      document.querySelector("#reset-status").textContent = "Если аккаунт существует, письмо отправлено.";
     });
   }
   if (resetConfirmForm) {
@@ -96,7 +96,7 @@ function bindAuthForms() {
       const payload = Object.fromEntries(form.entries());
       payload.token = new URLSearchParams(location.search).get("token") || payload.token;
       await api("/auth/password-reset/confirm", { method: "POST", body: JSON.stringify(payload) });
-      document.querySelector("#reset-status").textContent = "Password updated. You can log in.";
+      document.querySelector("#reset-status").textContent = "Пароль обновлён. Теперь можно войти.";
     });
   }
 }

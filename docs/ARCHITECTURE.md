@@ -1,30 +1,30 @@
-# MFriends architecture
+# Архитектура MFriends
 
-MFriends is a friendship-first fullstack platform for finding friends, teammates, study/coding buddies and safe online/offline activities. It is explicitly not a dating app.
+MFriends — friendship-first fullstack-платформа для поиска друзей, тиммейтов, study/coding buddy и безопасных онлайн/офлайн активностей. Это явно не dating app.
 
 ## Domain architecture
 
-Wildcard DNS should point `*.denchy.cyou` to the VPS. Nginx routes by virtual host:
+Wildcard DNS должен направлять `*.denchy.cyou` на VPS. Nginx роутит по virtual host:
 
-- `mfriends.denchy.cyou` → static HTML/CSS/vanilla JS frontend
+- `mfriends.denchy.cyou` → статический HTML/CSS/vanilla JS frontend
 - `api.denchy.cyou` → FastAPI REST API
-- `ws.denchy.cyou` → WebSocket chat and WebRTC signaling
+- `ws.denchy.cyou` → WebSocket chat и WebRTC signaling
 - `cdn.denchy.cyou` → uploads/static files
-- `mail.denchy.cyou` → SMTP/IMAP service endpoint for `mail@denchy.cyou`
-- `dev.denchy.cyou` → protected development environment
+- `mail.denchy.cyou` → SMTP/IMAP endpoint для `mail@denchy.cyou`
+- `dev.denchy.cyou` → защищённая dev-среда
 
 ## Backend modules
 
-- `api/auth.py` — JWT auth, refresh tokens, email verification, password reset and cooldowns
-- `api/profiles.py` — profile CRUD and people discovery filters
-- `api/requests.py` — activity requests, direct requests, reward validation and chat creation
-- `api/chat.py` — chat list, messages, image attachments and voice placeholders
-- `api/moderation.py` — reports, blocks, safety summary, admin queue and analytics
-- `api/verification.py` — selfie, voice code and liveness placeholders with temporary storage
-- `api/uploads.py` — secure image/audio/avatar uploads
-- `realtime/routes.py` — WebSocket chat, typing indicators and WebRTC signaling
-- `services/moderation.py` — external AI moderation hook for toxicity/spam/scam/harassment
-- `services/email.py` — SMTP sender and HTML email templates from `mail@denchy.cyou`
+- `api/auth.py` — JWT auth, refresh tokens, email verification, password reset, cooldowns
+- `api/profiles.py` — CRUD профиля и фильтры people discovery
+- `api/requests.py` — activity/direct requests, reward validation, создание чатов
+- `api/chat.py` — список чатов, сообщения, изображения, voice placeholders
+- `api/moderation.py` — reports, blocks, safety summary, admin queue, analytics
+- `api/verification.py` — selfie, voice code, liveness placeholders с временным хранением
+- `api/uploads.py` — безопасные uploads для image/audio/avatar
+- `realtime/routes.py` — WebSocket chat, typing indicators, WebRTC signaling
+- `services/moderation.py` — hook под внешнюю AI moderation API для toxicity/spam/scam/harassment
+- `services/email.py` — SMTP sender и HTML email templates от `mail@denchy.cyou`
 
 ## Database
 
@@ -46,29 +46,29 @@ SQLite tables:
 - `upload_files`
 - `activity_events`
 
-SQLite runs with WAL mode and one Uvicorn worker for 512 MB VPS compatibility.
+SQLite работает в WAL mode, а Uvicorn запускается одним worker — так проект нормально живёт на VPS с 512 MB RAM.
 
 ## Safety
 
-Safety is built into:
+Безопасность встроена в:
 
-- rate limits per IP/user
+- rate limits по IP/user
 - JWT token validation
-- password hashing with bcrypt
-- upload MIME allow-list and upload size limits
-- city/district discovery without realtime GPS
-- report and block records
-- moderation logs and trust-score signals
-- scam/spam local heuristics plus external AI hooks
-- reward rules blocking dating/adult/paid-companionship payments
-- temporary verification files with auto-delete windows
+- password hashing через bcrypt
+- upload MIME allow-list и лимиты размера
+- city/district discovery без realtime GPS
+- reports и blocks
+- moderation logs и trust-score signals
+- local scam/spam heuristics + external AI hooks
+- reward rules, которые блокируют dating/adult/paid-companionship payments
+- временные verification files с auto-delete windows
 
 ## WebRTC
 
-The VPS handles signaling only:
+VPS занимается только signaling:
 
 - `webrtc.offer`
 - `webrtc.answer`
 - `webrtc.ice`
 
-Audio/video media flows directly between browsers. STUN is enabled by default and TURN config is represented by environment placeholders.
+Audio/video идут напрямую между браузерами. STUN включён по умолчанию, TURN вынесен в environment placeholders.

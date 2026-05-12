@@ -1,15 +1,16 @@
 :root {
-  --color-mercury-blue: #5266eb;
-  --color-ghost-blue: #cdddff;
-  --color-deep-space: #171721;
-  --color-midnight-slate: #1e1e2a;
-  --color-graphite: #272735;
-  --color-lead: #70707d;
-  --color-starlight: #ededf3;
-  --color-silver: #c3c3cc;
-  --color-pure-white: #ffffff;
-  --font-arcadiadisplay: Inter, Manrope, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  --font-arcadia: Inter, Manrope, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --color-mercury-blue: #dedbc8;
+  --color-ghost-blue: #c0a080;
+  --color-deep-space: #000000;
+  --color-midnight-slate: #101010;
+  --color-graphite: #212121;
+  --color-lead: #333333;
+  --color-starlight: #e1e0cc;
+  --color-silver: #888888;
+  --color-pure-white: #000000;
+  --font-arcadiadisplay: Almarai, Inter, Manrope, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-arcadia: Almarai, Inter, Manrope, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-serif-accent: "Instrument Serif", Georgia, serif;
   --text-caption: 12px;
   --text-body-sm: 14px;
   --text-body: 16px;
@@ -32,9 +33,9 @@
   --spacing-112: 112px;
   --spacing-128: 128px;
   --page-max-width: 1200px;
-  --radius-md: 4px;
-  --radius-pill: 32px;
-  --radius-header-pill: 40px;
+  --radius-md: 1rem;
+  --radius-pill: 9999px;
+  --radius-header-pill: 0 0 2rem 2rem;
 }
 
 * {
@@ -47,7 +48,7 @@ html {
 
 body {
   margin: 0;
-  background: var(--color-deep-space);
+  background: #000;
   color: var(--color-starlight);
   font-family: var(--font-arcadia);
   font-size: var(--text-body);
@@ -69,8 +70,9 @@ select {
 .app-shell {
   min-height: 100vh;
   background:
-    radial-gradient(circle at 72% 16%, rgba(82, 102, 235, 0.14), transparent 28rem),
-    linear-gradient(180deg, rgba(30, 30, 42, 0.92), var(--color-deep-space));
+    radial-gradient(circle at 78% 12%, rgba(222, 219, 200, 0.12), transparent 28rem),
+    radial-gradient(circle at 12% 28%, rgba(192, 160, 128, 0.08), transparent 24rem),
+    #000;
 }
 
 .topbar {
@@ -82,20 +84,20 @@ select {
   justify-content: space-between;
   gap: var(--spacing-24);
   padding: var(--spacing-16) clamp(var(--spacing-20), 4vw, var(--spacing-56));
-  background: rgba(23, 23, 33, 0.78);
-  border-bottom: 1px solid rgba(112, 112, 125, 0.32);
-  backdrop-filter: blur(16px);
+  background: rgba(16, 16, 16, 0.88);
+  border-bottom: 1px solid #212121;
+  backdrop-filter: blur(18px);
 }
 
 .brand {
   font-family: var(--font-arcadiadisplay);
-  font-weight: 480;
+  font-weight: 800;
   letter-spacing: 0.02em;
   text-decoration: none;
 }
 
 .brand span {
-  color: var(--color-silver);
+  color: var(--color-mercury-blue);
 }
 
 .nav {
@@ -113,7 +115,7 @@ select {
 
 .nav a:hover,
 .footer-link:hover {
-  color: var(--color-ghost-blue);
+  color: var(--color-mercury-blue);
 }
 
 .nav-tag,
@@ -124,6 +126,10 @@ select {
   font-size: var(--text-caption);
   letter-spacing: 0.24px;
   text-transform: uppercase;
+}
+
+:is(.eyebrow, .mono, .status, .field span) {
+  text-transform: none;
 }
 
 .chat-cta,
@@ -141,34 +147,36 @@ select {
   gap: var(--spacing-8);
   padding: 0 var(--spacing-24);
   text-decoration: none;
-  transition: background 160ms ease, color 160ms ease, opacity 160ms ease;
+  transition: background 160ms ease, color 160ms ease, opacity 160ms ease, transform 160ms ease, border-color 160ms ease;
 }
 
 .primary {
-  background: var(--color-mercury-blue);
-  color: var(--color-pure-white);
-  font-weight: 480;
+  background: linear-gradient(135deg, #dedbc8 0%, #c0a080 100%);
+  color: #000;
+  font-weight: 700;
 }
 
 .primary:hover {
-  background: #6577f0;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(222, 219, 200, 0.18);
 }
 
 .chat-cta,
 .secondary {
-  background: rgba(205, 221, 255, 0.18);
+  background: #101010;
   color: var(--color-starlight);
-  border-radius: var(--radius-header-pill);
+  border: 1px solid #333333;
 }
 
 .ghost {
-  background: var(--color-graphite);
-  color: var(--color-starlight);
+  background: #212121;
+  color: var(--color-mercury-blue);
+  border: 1px solid #333333;
 }
 
 .danger {
   background: transparent;
-  color: var(--color-ghost-blue);
+  color: var(--color-mercury-blue);
   border: 1px solid var(--color-lead);
 }
 
@@ -178,18 +186,34 @@ select {
   min-height: calc(100vh - 76px);
   place-items: center;
   overflow: hidden;
+  margin: 1rem;
   padding: var(--spacing-112) var(--spacing-20);
   text-align: center;
+  border: 1px solid #212121;
+  border-radius: 2rem;
+  background: #101010;
 }
 
 .hero::before {
   position: absolute;
   inset: 0;
   background:
-    linear-gradient(180deg, rgba(23, 23, 33, 0.18), rgba(23, 23, 33, 0.86)),
+    linear-gradient(180deg, rgba(0, 0, 0, 0.28), rgba(0, 0, 0, 0.78)),
     url("https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1800&q=70") center/cover;
   content: "";
-  filter: saturate(0.7) brightness(0.62);
+  filter: saturate(0.55) brightness(0.52);
+}
+
+.noise-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+  background-size: 128px 128px;
+  mix-blend-mode: overlay;
+  opacity: 0.58;
+  pointer-events: none;
 }
 
 .hero-content {
@@ -202,14 +226,15 @@ h1,
 h2,
 h3 {
   font-family: var(--font-arcadiadisplay);
-  font-weight: 360;
-  letter-spacing: 0.01em;
+  font-weight: 500;
+  letter-spacing: -0.02em;
 }
 
 h1 {
   margin: var(--spacing-20) auto;
-  font-size: clamp(42px, 8vw, var(--text-display));
-  line-height: 1.1;
+  font-size: clamp(56px, 11vw, 132px);
+  line-height: 0.9;
+  letter-spacing: -0.07em;
 }
 
 h2 {
@@ -273,15 +298,25 @@ p {
 .request,
 .message,
 .admin-card {
-  background: rgba(30, 30, 42, 0.92);
-  border: 1px solid rgba(112, 112, 125, 0.42);
-  border-radius: 0;
+  background: #101010;
+  border: 1px solid #212121;
+  border-radius: 1rem;
   padding: var(--spacing-24);
+  transition: border-color 160ms ease, transform 160ms ease, box-shadow 160ms ease;
+}
+
+.card:hover,
+.feature-link:hover,
+.person:hover,
+.request:hover,
+.admin-card:hover {
+  border-color: var(--color-mercury-blue);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(222, 219, 200, 0.08);
 }
 
 .feature-link {
   display: block;
-  border-width: 0 0 1px;
   text-decoration: none;
 }
 
@@ -289,10 +324,10 @@ p {
   display: inline-flex;
   width: fit-content;
   align-items: center;
-  border: 1px solid rgba(205, 221, 255, 0.24);
+  border: 1px solid #333333;
   border-radius: var(--radius-pill);
   padding: var(--spacing-4) var(--spacing-12);
-  background: rgba(205, 221, 255, 0.12);
+  background: #212121;
   color: var(--color-starlight);
   font-size: var(--text-caption);
 }
@@ -330,16 +365,16 @@ input,
 textarea,
 select {
   width: 100%;
-  border: 1px solid rgba(112, 112, 125, 0.55);
-  border-radius: var(--radius-pill);
+  border: 1px solid #333333;
+  border-radius: 0.75rem;
   padding: var(--spacing-12) var(--spacing-16);
-  background: transparent;
+  background: #212121;
   color: var(--color-starlight);
   outline: none;
 }
 
 textarea {
-  border-radius: var(--spacing-20);
+  border-radius: 1rem;
   resize: vertical;
 }
 
@@ -372,7 +407,8 @@ select:focus {
 .sidebar a.active,
 .sidebar a:hover {
   color: var(--color-starlight);
-  background: var(--color-graphite);
+  background: #212121;
+  border-radius: 0.75rem;
 }
 
 .dashboard {
@@ -406,8 +442,8 @@ select:focus {
 }
 
 .message.mine {
-  border-color: rgba(82, 102, 235, 0.78);
-  background: rgba(82, 102, 235, 0.1);
+  border-color: var(--color-mercury-blue);
+  background: rgba(222, 219, 200, 0.08);
 }
 
 .attachment-preview {
@@ -439,7 +475,7 @@ video {
 .notice {
   border-left: 1px solid var(--color-lead);
   padding: var(--spacing-12) var(--spacing-16);
-  background: rgba(39, 39, 53, 0.82);
+  background: #101010;
   color: var(--color-silver);
 }
 
