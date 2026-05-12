@@ -1,14 +1,16 @@
-# VPS setup for 512 MB RAM
+# Настройка VPS на 512 MB RAM
 
-## Recommended server
+## Рекомендуемый сервер
 
-- Ubuntu 22.04 or 24.04
-- 512 MB RAM minimum
+- Ubuntu 22.04 или 24.04
+- минимум 512 MB RAM
 - 1 vCPU
 - 8 GB disk
-- swap enabled
+- включённый swap
 
 ## Swap
+
+На маленьком VPS обязательно добавь swap:
 
 ```bash
 sudo fallocate -l 1G /swapfile
@@ -18,23 +20,23 @@ sudo swapon /swapfile
 echo '/swapfile none swap sw 0 0' | sudo tee -a /etc/fstab
 ```
 
-## DNS architecture
+## DNS
 
-Create a wildcard DNS record:
+Создай wildcard DNS-запись:
 
 ```text
 *.denchy.cyou A <VPS-IP>
 denchy.cyou A <VPS-IP>
 ```
 
-Subdomains are routed by Nginx virtual hosts:
+Nginx будет роутить поддомены так:
 
-- `mfriends.denchy.cyou` frontend
-- `api.denchy.cyou` FastAPI
-- `ws.denchy.cyou` WebSockets/WebRTC signaling
-- `cdn.denchy.cyou` uploads/static
-- `mail.denchy.cyou` email services
-- `dev.denchy.cyou` protected development environment
+- `mfriends.denchy.cyou` → frontend
+- `api.denchy.cyou` → FastAPI
+- `ws.denchy.cyou` → WebSockets/WebRTC signaling
+- `cdn.denchy.cyou` → uploads/static
+- `mail.denchy.cyou` → email services
+- `dev.denchy.cyou` → закрытая dev-среда
 
 ## Firewall
 
@@ -44,23 +46,23 @@ sudo ufw allow 'Nginx Full'
 sudo ufw enable
 ```
 
-## Low-RAM choices
+## Почему это нормально для 512 MB RAM
 
-- one Uvicorn worker
-- SQLite WAL mode
-- static frontend served by Nginx
-- WebRTC media stays peer-to-peer
-- no local AI models
-- upload limit defaults to 5 MB
-- no React/Next.js/Kubernetes/microservices
+- один Uvicorn worker
+- SQLite в WAL mode
+- frontend отдаёт Nginx как статику
+- WebRTC media идёт P2P, не через VPS
+- локальные AI-модели не запускаются
+- лимит uploads по умолчанию 5 MB
+- без React/Next.js/Kubernetes/microservices
 
 ## Email
 
-Configure your mail provider or local mail stack so `mail@denchy.cyou` can send SMTP mail. Store SMTP credentials in `/opt/mfriends/.env` only.
+Нужно настроить SMTP так, чтобы `mail@denchy.cyou` мог отправлять письма. SMTP-логин/пароль храни только в `/opt/mfriends/.env`.
 
 ## Dev host
 
-`dev.denchy.cyou` is protected with Nginx basic auth. Create the password file before enabling the config:
+`dev.denchy.cyou` закрывается через Nginx basic auth. Перед включением конфига создай пароль:
 
 ```bash
 sudo apt-get install -y apache2-utils

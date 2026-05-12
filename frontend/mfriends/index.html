@@ -1,9 +1,13 @@
 <!doctype html>
-<html lang="en">
+<html lang="ru">
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>MFriends — Safe friendship platform</title>
+    <title>MFriends — безопасный поиск друзей</title>
+    <meta name="description" content="MFriends — не dating app, а безопасная платформа для поиска друзей, тиммейтов и людей по интересам.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Almarai:wght@300;400;700;800&family=Instrument+Serif:ital@1&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/styles.css">
   </head>
   <body>
@@ -11,52 +15,53 @@
       <header class="topbar">
         <a class="brand" href="index.html">M<span>Friends</span></a>
         <nav class="nav">
-          <a href="#mission">MISSION</a>
-          <a href="#features">SAFETY</a>
-          <a href="#activities">ACTIVITIES</a>
-          <a href="login.html">LOGIN</a>
+          <a href="#mission">Идея</a>
+          <a href="#features">Безопасность</a>
+          <a href="#activities">Активности</a>
+          <a href="login.html">Вход</a>
         </nav>
-        <a class="chat-cta" href="register.html">● START NOW</a>
+        <a class="chat-cta" href="register.html">● Начать</a>
       </header>
 
       <main>
         <section class="hero">
+          <div class="noise-overlay"></div>
           <div class="hero-content">
-            <div class="eyebrow">FRIENDS · TEAMMATES · SHARED ACTIVITIES</div>
-            <h1>Find trusted people by interests, not dating signals.</h1>
-            <p>MFriends is a safe command center for gaming buddies, coding partners, study groups, walks, events and online/offline friendships.</p>
+            <div class="eyebrow">Друзья · тиммейты · общие активности</div>
+            <h1>Ищи людей по интересам, а не по дейтинг-анкетам.</h1>
+            <p>MFriends — безопасное место для поиска друзей, тиммейтов, coding buddy, study buddy, прогулок, игр и онлайн/офлайн общения.</p>
             <div class="hero-actions">
-              <a class="primary" href="register.html">CREATE ACCOUNT</a>
-              <a class="secondary" href="#features">VIEW SAFETY MODEL</a>
+              <a class="primary" href="register.html">Создать аккаунт</a>
+              <a class="secondary" href="#features">Как устроена безопасность</a>
             </div>
           </div>
         </section>
 
         <section id="mission" class="section">
-          <p class="eyebrow">NOT A DATING APP</p>
-          <h2>Built for friendship-first discovery.</h2>
-          <a class="feature-link" href="register.html"><h3>Gaming, coding, studying and walking buddies</h3><p>Browse people and requests by interests, games, city/district, verified status and online/offline preference.</p></a>
-          <a class="feature-link" href="register.html"><h3>Privacy without realtime GPS</h3><p>Exact location is hidden. Discovery uses city and district only, with safety warnings before offline plans.</p></a>
-          <a class="feature-link" href="register.html"><h3>Rewards with strict boundaries</h3><p>Rewards are allowed only for gaming help, tutoring, coaching and shared tasks — never dating, adult services or paid companionship.</p></a>
+          <p class="eyebrow">Это не dating app</p>
+          <h2>Платформа сделана вокруг дружбы и общих интересов.</h2>
+          <a class="feature-link" href="register.html"><h3>Игры, кодинг, учёба и прогулки</h3><p>Ищи людей и заявки по интересам, играм, городу/району, верификации и формату общения.</p></a>
+          <a class="feature-link" href="register.html"><h3>Приватность без GPS-карты</h3><p>Точная геолокация не показывается. В поиске есть только город и район, а перед офлайн-встречами — предупреждения.</p></a>
+          <a class="feature-link" href="register.html"><h3>Награды без мутных схем</h3><p>Reward разрешён только для помощи в играх, обучения, коучинга и совместных задач — не для дейтинга или adult services.</p></a>
         </section>
 
         <section id="features" class="section">
-          <p class="eyebrow">PRODUCTION SAFETY ARCHITECTURE</p>
-          <h2>Moderation, verification and trust are core flows.</h2>
+          <p class="eyebrow">Безопасность как база</p>
+          <h2>Модерация, верификация и trust score встроены в основные сценарии.</h2>
           <div class="grid">
-            <article class="card"><span class="pill">MODERATION</span><h3>External AI hooks</h3><p>Toxicity, scam, spam and harassment detection are provider-neutral and ready for external APIs.</p></article>
-            <article class="card"><span class="pill">TRUST</span><h3>Verification queue</h3><p>Selfie, voice code and liveness placeholders store temporary review data with auto-delete windows.</p></article>
-            <article class="card"><span class="pill">REALTIME</span><h3>P2P video calls</h3><p>WebRTC media stays browser-to-browser. The VPS only handles signaling through secure WebSockets.</p></article>
+            <article class="card"><span class="pill">Модерация</span><h3>Хуки под внешние AI API</h3><p>Архитектура готова к проверке токсичности, спама, скама и харассмента через внешних провайдеров.</p></article>
+            <article class="card"><span class="pill">Доверие</span><h3>Очередь верификации</h3><p>Селфи, голосовой код и проверка живости подготовлены как временные проверки с автоудалением данных.</p></article>
+            <article class="card"><span class="pill">Realtime</span><h3>P2P видеозвонки</h3><p>Видео идёт браузер-браузер через WebRTC. VPS нужен только для сигналинга по WebSocket.</p></article>
           </div>
         </section>
 
         <section id="activities" class="section">
-          <p class="eyebrow">ONLINE + OFFLINE</p>
-          <h2>Create requests for safe shared activities.</h2>
+          <p class="eyebrow">Онлайн + офлайн</p>
+          <h2>Создавай заявки на безопасные совместные активности.</h2>
           <div class="grid">
-            <article class="card"><h3>Online</h3><p>Gaming, coding, studying, watch together and language practice.</p></article>
-            <article class="card"><h3>Offline</h3><p>Walking, sports, cafes, board games and public events.</p></article>
-            <article class="card"><h3>Operations</h3><p>FastAPI, SQLite WAL, WebSockets, Nginx virtual hosts and 512 MB VPS deployment scripts.</p></article>
+            <article class="card"><h3>Онлайн</h3><p>Игры, кодинг, учёба, совместный просмотр и языковая практика.</p></article>
+            <article class="card"><h3>Офлайн</h3><p>Прогулки, спорт, кафе, настолки и публичные мероприятия.</p></article>
+            <article class="card"><h3>Техчасть</h3><p>FastAPI, SQLite WAL, WebSockets, Nginx virtual hosts и скрипты под VPS на 512 MB RAM.</p></article>
           </div>
         </section>
       </main>

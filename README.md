@@ -1,80 +1,113 @@
 # MFriends
 
-MFriends is a production-oriented, low-RAM fullstack platform for finding friends, teammates and activity buddies. It is not a dating app.
+MFriends — fullstack-платформа для безопасного поиска друзей, тиммейтов и людей по интересам. Это не dating app: фокус только на дружбе, играх, учёбе, coding buddy, study buddy и совместных онлайн/офлайн активностях.
 
-## Stack
+## Стек
 
 - Frontend: HTML, CSS, Vanilla JavaScript
 - Backend: Python FastAPI
-- Database: SQLite
+- Database: SQLite + WAL
 - Realtime: WebSocket
-- Video calls: WebRTC P2P signaling only
+- Video calls: WebRTC P2P, backend только для signaling
 - Reverse proxy: Nginx virtual hosts
-- Hosting target: small VPS with 512 MB RAM
+- Target hosting: маленький VPS от 512 MB RAM
 
-## Domains
+## Домены
 
-Use wildcard DNS for `*.denchy.cyou`:
+Нужен wildcard DNS для `*.denchy.cyou`:
 
 ```text
-mfriends.denchy.cyou → static frontend
+mfriends.denchy.cyou → статический frontend
 api.denchy.cyou      → FastAPI REST API
 ws.denchy.cyou       → WebSocket chat + WebRTC signaling
 cdn.denchy.cyou      → uploads/static files
-mail.denchy.cyou     → email services for mail@denchy.cyou
-dev.denchy.cyou      → protected development environment
+mail.denchy.cyou     → SMTP/email для mail@denchy.cyou
+dev.denchy.cyou      → закрытая dev-среда
 ```
 
-## Local development
+## Как запустить локально
+
+1. Подготовь Python-окружение:
 
 ```bash
 python3 -m venv .venv
 . .venv/bin/activate
 pip install -e ".[dev]"
 cp .env.example .env
+```
+
+2. Создай SQLite-базу:
+
+```bash
 python -m backend.app.db.init_db
+```
+
+3. Запусти backend:
+
+```bash
 uvicorn backend.app.main:app --reload --host 127.0.0.1 --port 8000
 ```
 
-Frontend:
+4. Открой frontend одним из вариантов.
+
+Просто файлом:
 
 ```text
-Open frontend/mfriends/index.html
+frontend/mfriends/index.html
 ```
 
-or serve it with any static file server.
+Или через статический сервер:
 
-## Checks
+```bash
+python3 -m http.server 8010 --directory frontend/mfriends
+```
+
+После этого открой:
+
+```text
+http://127.0.0.1:8010
+```
+
+Локальный frontend сам ходит в API по `/api`, поэтому для полного локального режима удобнее проксировать через nginx или открыть backend/frontend под одной точкой. Для быстрой проверки backend API доступен тут:
+
+```text
+http://127.0.0.1:8000/api/health
+```
+
+## Проверки перед PR/deploy
 
 ```bash
 ruff check backend tests
-pytest
+pytest -q tests
+python3 -m compileall backend
 ```
 
-## Production deployment
+## Что уже есть
 
-See:
+- JWT access/refresh tokens
+- register/login
+- email verification и password reset
+- профили: avatar, bio, interests, games, hobbies, city/district, friendship preference, trust score
+- discovery по интересам/играм/городу/району/верификации
+- заявки на онлайн/офлайн активности
+- reward validation: можно обучение/коучинг/gaming help/shared tasks, нельзя dating/adult/paid companionship
+- realtime chat, typing indicators, image sending, voice placeholder
+- WebRTC signaling для P2P calls
+- reports, blocks, anti-spam, moderation logs
+- hooks под внешние AI moderation API
+- verification placeholders: selfie, voice code, liveness
+- admin queue, reports dashboard, analytics
+- Nginx/systemd/deploy configs под VPS
+
+## Продакшен
+
+Смотри:
 
 - `docs/VPS_SETUP.md`
 - `docs/DEPLOYMENT.md`
 - `deploy/nginx/mfriends.conf`
 - `deploy/systemd/mfriends-api.service`
 
-## Security model
+## Важно про безопасность
 
-This repository includes:
-
-- JWT access and refresh tokens
-- password hashing
-- email verification and password reset flows
-- rate limiting and anti-spam checks
-- upload validation
-- moderation hooks for external APIs
-- report, block and trust-score storage
-- WebSocket authentication
-- typing indicators and realtime messaging
-- WebRTC signaling without relaying media through the VPS
-- verification placeholders with temporary storage and auto-delete windows
-- admin moderation queue, suspicious users, analytics and AI moderation logs
-
-AI moderation hooks are intentionally provider-neutral. Configure an external moderation API in environment variables; no local AI model is required.
+Точная GPS-локация не показывается. WebRTC-видео не идёт через VPS. AI-модерация сделана через provider-neutral hooks: локальные AI-модели не запускаются.

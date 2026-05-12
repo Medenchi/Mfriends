@@ -7,6 +7,50 @@ const state = {
   typingTimer: null,
 };
 
+const dictionaries = {
+  mode: {
+    both: "онлайн + офлайн",
+    online: "онлайн",
+    offline: "офлайн",
+  },
+  friendship: {
+    both: "временная + постоянная",
+    temporary: "временная",
+    permanent: "постоянная",
+  },
+  status: {
+    pending: "ожидает",
+    accepted: "принята",
+    declined: "отклонена",
+    blocked: "заблокирована",
+    allowed: "разрешено",
+  },
+  category: {
+    gaming: "игры",
+    coding: "кодинг",
+    studying: "учёба",
+    watch_together: "совместный просмотр",
+    language_practice: "практика языка",
+    walking: "прогулки",
+    sports: "спорт",
+    cafes: "кафе",
+    board_games: "настолки",
+    events: "события",
+  },
+  badge: {
+    none: "без бейджа",
+  },
+  role: {
+    user: "пользователь",
+    moderator: "модератор",
+    admin: "админ",
+  },
+};
+
+function translate(kind, value, fallback = "") {
+  return dictionaries[kind]?.[value] || value || fallback;
+}
+
 function $(selector) {
   return document.querySelector(selector);
 }
@@ -41,9 +85,9 @@ async function loadMe() {
   $("#profile-hobbies").value = state.me.hobbies || "";
   $("#avatar-preview").src = state.me.avatar_url || "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80'%3E%3Crect width='80' height='80' fill='%23272735'/%3E%3Ctext x='40' y='48' fill='%23ededf3' text-anchor='middle' font-size='24'%3EM%3C/text%3E%3C/svg%3E";
   $("#me-summary").innerHTML = `
-    <span class="pill">TRUST ${state.me.trust_score || 50}/100</span>
-    <span class="pill">${htmlEscape(state.me.verification_badge || "none")}</span>
-    <p>${htmlEscape(state.me.email)} · ${state.me.is_email_verified ? "verified" : "email pending"} · role ${htmlEscape(state.me.role)}</p>
+    <span class="pill">trust ${state.me.trust_score || 50}/100</span>
+    <span class="pill">${htmlEscape(translate("badge", state.me.verification_badge, "без бейджа"))}</span>
+    <p>${htmlEscape(state.me.email)} · ${state.me.is_email_verified ? "email подтверждён" : "email ожидает подтверждения"} · роль ${htmlEscape(translate("role", state.me.role))}</p>
   `;
 }
 
@@ -62,13 +106,13 @@ async function loadPeople() {
     <article class="person">
       <div class="row">
         <h3>${htmlEscape(person.display_name)}</h3>
-        <span class="pill">${htmlEscape(person.online_offline_preference)}</span>
+        <span class="pill">${htmlEscape(translate("mode", person.online_offline_preference))}</span>
         <span class="pill">trust ${person.trust_score || 50}</span>
       </div>
-      <p>${htmlEscape(person.bio || "No bio yet")}</p>
-      <p class="mono">${htmlEscape(person.city || "remote")} ${person.district ? "· " + htmlEscape(person.district) : ""} · ${htmlEscape(person.verification_badge || "no badge")}</p>
+      <p>${htmlEscape(person.bio || "Пока без описания")}</p>
+      <p class="mono">${htmlEscape(person.city || "удалённо")} ${person.district ? "· " + htmlEscape(person.district) : ""} · ${htmlEscape(translate("badge", person.verification_badge, "без бейджа"))}</p>
       <p>${htmlEscape([person.interests, person.games, person.hobbies].filter(Boolean).join(" · "))}</p>
-      <button class="ghost" data-request="${person.user_id}">SEND REQUEST</button>
+      <button class="ghost" data-request="${person.user_id}">Отправить заявку</button>
     </article>
   `).join("");
 }
@@ -77,12 +121,12 @@ async function loadRequests() {
   const data = await api("/requests");
   $("#request-list").innerHTML = data.requests.map((request) => `
     <article class="request">
-      <div class="row"><h3>${htmlEscape(request.title || request.sender_name || `User #${request.sender_id}`)}</h3><span class="pill">${htmlEscape(request.mode)}</span><span class="pill">${htmlEscape(request.category)}</span></div>
+      <div class="row"><h3>${htmlEscape(request.title || request.sender_name || `Пользователь #${request.sender_id}`)}</h3><span class="pill">${htmlEscape(translate("mode", request.mode))}</span><span class="pill">${htmlEscape(translate("category", request.category))}</span></div>
       <p>${htmlEscape(request.description || request.message)}</p>
-      <p class="mono">${htmlEscape(request.tags)} · ${htmlEscape(request.status)} ${request.reward ? "· reward: " + htmlEscape(request.reward) : ""}</p>
+      <p class="mono">${htmlEscape(request.tags)} · ${htmlEscape(translate("status", request.status))} ${request.reward ? "· награда: " + htmlEscape(request.reward) : ""}</p>
       ${request.sender_id !== state.me.user_id && request.status === "pending" ? `
-        <button class="primary" data-answer="${request.id}:accepted">ACCEPT</button>
-        <button class="secondary" data-answer="${request.id}:declined">DECLINE</button>
+        <button class="primary" data-answer="${request.id}:accepted">Принять</button>
+        <button class="secondary" data-answer="${request.id}:declined">Отклонить</button>
       ` : ""}
     </article>
   `).join("");
@@ -91,7 +135,7 @@ async function loadRequests() {
 async function loadChats() {
   const data = await api("/chats");
   $("#chat-list").innerHTML = data.chats.map((chat) => `
-    <button class="ghost" data-chat="${chat.id}">CHAT #${chat.id} · ${htmlEscape(chat.members || "members")}</button>
+    <button class="ghost" data-chat="${chat.id}">Чат #${chat.id} · ${htmlEscape(chat.members || "участники")}</button>
   `).join("");
 }
 
@@ -104,8 +148,8 @@ async function openChat(chatId) {
       <strong>${htmlEscape(message.sender_name)}</strong>
       <p>${htmlEscape(message.body)}</p>
       ${message.attachment_url ? `<img class="attachment-preview" src="${htmlEscape(message.attachment_url)}" alt="attachment">` : ""}
-      ${message.voice_placeholder ? `<p class="notice">Voice message placeholder</p>` : ""}
-      <span class="mono">${htmlEscape(message.moderation_status)}</span>
+      ${message.voice_placeholder ? `<p class="notice">Плейсхолдер голосового сообщения</p>` : ""}
+      <span class="mono">${htmlEscape(translate("status", message.moderation_status, message.moderation_status))}</span>
     </div>
   `).join("");
 }
@@ -119,7 +163,7 @@ function connectSocket() {
       await openChat(state.currentChatId);
     }
     if (message.event === "chat.typing" && Number(message.chat_id) === state.currentChatId && Number(message.from) !== state.me.user_id) {
-      $("#typing-status").textContent = message.is_typing ? `User #${message.from} is typing...` : "";
+      $("#typing-status").textContent = message.is_typing ? `Пользователь #${message.from} печатает...` : "";
     }
     if (message.event.startsWith("webrtc.")) {
       await handleSignal(message);
@@ -217,20 +261,20 @@ async function handleSignal(message) {
 async function loadSafetySummary() {
   const data = await api("/moderation/safety-summary");
   $("#safety-summary").innerHTML = `
-    <article class="admin-card"><h3>Trust</h3><pre>${htmlEscape(JSON.stringify(data.trust_score, null, 2))}</pre></article>
-    <article class="admin-card"><h3>Warnings</h3>${data.warnings.map((warning) => `<p>${htmlEscape(warning)}</p>`).join("")}</article>
-    <article class="admin-card"><h3>Recent moderation</h3><pre>${htmlEscape(JSON.stringify(data.recent, null, 2))}</pre></article>
+    <article class="admin-card"><h3>Trust score / доверие</h3><pre>${htmlEscape(JSON.stringify(data.trust_score, null, 2))}</pre></article>
+    <article class="admin-card"><h3>Предупреждения</h3>${data.warnings.map((warning) => `<p>${htmlEscape(warning)}</p>`).join("")}</article>
+    <article class="admin-card"><h3>Недавняя модерация</h3><pre>${htmlEscape(JSON.stringify(data.recent, null, 2))}</pre></article>
   `;
 }
 
 async function loadAdmin() {
   const [queue, analytics] = await Promise.all([api("/moderation/admin/queue"), api("/moderation/admin/analytics")]);
   $("#admin-content").innerHTML = `
-    <article class="admin-card"><h3>Analytics</h3><pre>${htmlEscape(JSON.stringify(analytics, null, 2))}</pre></article>
-    <article class="admin-card"><h3>Reports</h3><pre>${htmlEscape(JSON.stringify(queue.reports, null, 2))}</pre></article>
-    <article class="admin-card"><h3>Suspicious users</h3><pre>${htmlEscape(JSON.stringify(queue.suspicious_users, null, 2))}</pre></article>
-    <article class="admin-card"><h3>AI logs</h3><pre>${htmlEscape(JSON.stringify(queue.ai_moderation_logs, null, 2))}</pre></article>
-    <article class="admin-card"><h3>Verification review</h3><pre>${htmlEscape(JSON.stringify(queue.verification_review, null, 2))}</pre></article>
+    <article class="admin-card"><h3>Аналитика</h3><pre>${htmlEscape(JSON.stringify(analytics, null, 2))}</pre></article>
+    <article class="admin-card"><h3>Жалобы</h3><pre>${htmlEscape(JSON.stringify(queue.reports, null, 2))}</pre></article>
+    <article class="admin-card"><h3>Подозрительные пользователи</h3><pre>${htmlEscape(JSON.stringify(queue.suspicious_users, null, 2))}</pre></article>
+    <article class="admin-card"><h3>AI-логи</h3><pre>${htmlEscape(JSON.stringify(queue.ai_moderation_logs, null, 2))}</pre></article>
+    <article class="admin-card"><h3>Проверка верификаций</h3><pre>${htmlEscape(JSON.stringify(queue.verification_review, null, 2))}</pre></article>
   `;
 }
 
@@ -277,7 +321,7 @@ function bindApp() {
     if (!userId) return;
     await api("/requests", {
       method: "POST",
-      body: JSON.stringify({ receiver_id: Number(userId), request_type: "friend", title: "Friend request", message: "Let’s connect on MFriends." }),
+      body: JSON.stringify({ receiver_id: Number(userId), request_type: "friend", title: "Заявка в друзья", message: "Давай законнектимся в MFriends." }),
     });
     await loadRequests();
     setView("requests");
@@ -332,7 +376,7 @@ function bindApp() {
   });
   $("#block-form").addEventListener("submit", async (event) => {
     event.preventDefault();
-    await api("/moderation/blocks", { method: "POST", body: JSON.stringify({ blocked_user_id: Number($("#block-user-id").value), reason: "Blocked from safety panel" }) });
+    await api("/moderation/blocks", { method: "POST", body: JSON.stringify({ blocked_user_id: Number($("#block-user-id").value), reason: "Заблокировано из панели безопасности" }) });
     await loadSafetySummary();
   });
   $("#admin-load").addEventListener("click", loadAdmin);

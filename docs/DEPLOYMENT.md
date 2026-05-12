@@ -1,8 +1,8 @@
-# MFriends deployment guide
+# Деплой MFriends
 
 ## DNS
 
-Create wildcard DNS for `*.denchy.cyou` pointing to the VPS IP. Required hosts:
+Создай wildcard DNS для `*.denchy.cyou`, который смотрит на IP VPS. Нужные hostnames:
 
 - `mfriends.denchy.cyou`
 - `api.denchy.cyou`
@@ -11,7 +11,7 @@ Create wildcard DNS for `*.denchy.cyou` pointing to the VPS IP. Required hosts:
 - `mail.denchy.cyou`
 - `dev.denchy.cyou`
 
-## Deploy
+## Установка на VPS
 
 ```bash
 git clone https://github.com/Medenchi/Mfriends.git
@@ -20,22 +20,22 @@ sudo bash deploy/scripts/install-vps.sh "$PWD"
 sudo nano /opt/mfriends/.env
 ```
 
-Set:
+В `/opt/mfriends/.env` обязательно задай:
 
-- `SECRET_KEY`
+- `SECRET_KEY` — длинный случайный секрет
 - `DATABASE_PATH=/opt/mfriends/data/mfriends.sqlite3`
 - `UPLOAD_DIR=/opt/mfriends/uploads`
-- SMTP credentials for `mail@denchy.cyou`
-- optional external moderation API variables
-- optional TURN variables from a TURN provider
+- SMTP credentials для `mail@denchy.cyou`
+- опционально переменные внешней moderation API
+- опционально TURN credentials от TURN-провайдера
 
-Initialize database:
+## Инициализация базы
 
 ```bash
 sudo -u mfriends /opt/mfriends/venv/bin/python -m backend.app.db.init_db
 ```
 
-Start backend:
+## Запуск backend
 
 ```bash
 sudo systemctl enable --now mfriends-api
@@ -44,42 +44,34 @@ sudo systemctl status mfriends-api
 
 ## SSL
 
-After wildcard DNS resolves to the VPS:
+Когда wildcard DNS уже смотрит на VPS:
 
 ```bash
-sudo certbot --nginx \
-  -d denchy.cyou \
-  -d '*.denchy.cyou' \
-  --manual --preferred-challenges dns
+sudo certbot --nginx   -d denchy.cyou   -d '*.denchy.cyou'   --manual --preferred-challenges dns
 sudo systemctl reload nginx
 ```
 
-If DNS-01 wildcard automation is not available, issue separate HTTP certificates:
+Если wildcard-сертификат через DNS-01 неудобен, можно выпустить отдельные HTTP-сертификаты:
 
 ```bash
-sudo certbot --nginx \
-  -d mfriends.denchy.cyou \
-  -d api.denchy.cyou \
-  -d ws.denchy.cyou \
-  -d cdn.denchy.cyou \
-  -d dev.denchy.cyou
+sudo certbot --nginx   -d mfriends.denchy.cyou   -d api.denchy.cyou   -d ws.denchy.cyou   -d cdn.denchy.cyou   -d dev.denchy.cyou
 ```
 
-## WebSocket deployment
+## WebSocket
 
-`ws.denchy.cyou/ws` proxies to the same FastAPI process. Nginx keeps `Upgrade` and `Connection` headers and uses long read/send timeouts.
+`ws.denchy.cyou/ws` проксируется в тот же FastAPI-процесс. В Nginx включены `Upgrade`/`Connection` headers и длинные read/send timeouts.
 
 ## WebRTC
 
-The app uses STUN by default:
+По умолчанию используется STUN:
 
 ```js
 stun:stun.l.google.com:19302
 ```
 
-For production reliability, add TURN credentials from Coturn, Twilio, Metered or Cloudflare Calls. Do not relay video through the FastAPI VPS.
+Для стабильного продакшена добавь TURN credentials от Coturn, Twilio, Metered или Cloudflare Calls. Не передавай видео через FastAPI VPS — медиа должно идти P2P.
 
-## Operations
+## Полезные команды
 
 ```bash
 sudo journalctl -u mfriends-api -f
@@ -87,7 +79,7 @@ sudo nginx -t
 curl -fsS https://api.denchy.cyou/api/health
 ```
 
-## Production structure
+## Структура на сервере
 
 ```text
 /opt/mfriends

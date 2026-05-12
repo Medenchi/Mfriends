@@ -1,23 +1,26 @@
 <!doctype html>
-<html lang="en">
+<html lang="ru">
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Register — MFriends</title>
+    <title>Регистрация — MFriends</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Almarai:wght@300;400;700;800&family=Instrument+Serif:ital@1&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/styles.css">
   </head>
   <body>
     <div class="app-shell">
       <header class="topbar">
         <a class="brand" href="index.html">M<span>Friends</span></a>
-        <nav class="nav"><a href="login.html">LOGIN</a></nav>
+        <nav class="nav"><a href="login.html">Вход</a></nav>
       </header>
       <main class="auth-layout">
         <form id="register-form" class="form-card">
-          <p class="eyebrow">CREATE SAFE PROFILE</p>
-          <h1>Start finding buddies.</h1>
+          <p class="eyebrow">Безопасный профиль</p>
+          <h1>Начни искать своих людей.</h1>
           <label class="field">
-            <span>Display name</span>
+            <span>Имя на платформе</span>
             <input name="display_name" minlength="2" maxlength="48" required>
           </label>
           <label class="field">
@@ -25,11 +28,11 @@
             <input name="email" type="email" autocomplete="email" required>
           </label>
           <label class="field">
-            <span>Password</span>
+            <span>Пароль</span>
             <input name="password" type="password" minlength="10" autocomplete="new-password" required>
           </label>
-          <button class="primary" type="submit">REGISTER</button>
-          <a class="secondary" href="login.html">Already registered?</a>
+          <button class="primary" type="submit">Зарегистрироваться</button>
+          <a class="secondary" href="login.html">Уже есть аккаунт?</a>
         </form>
       </main>
     </div>
