@@ -4,6 +4,8 @@ CREATE TABLE IF NOT EXISTS users (
   password_hash TEXT NOT NULL,
   is_email_verified INTEGER NOT NULL DEFAULT 0,
   is_active INTEGER NOT NULL DEFAULT 1,
+  role TEXT NOT NULL DEFAULT 'user' CHECK(role IN ('user','moderator','admin')),
+  last_login_at TEXT,
   created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
@@ -11,14 +13,21 @@ CREATE TABLE IF NOT EXISTS users (
 CREATE TABLE IF NOT EXISTS profiles (
   user_id INTEGER PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
   display_name TEXT NOT NULL,
+  username TEXT NOT NULL DEFAULT '',
   bio TEXT NOT NULL DEFAULT '',
   city TEXT NOT NULL DEFAULT '',
+  district TEXT NOT NULL DEFAULT '',
   timezone TEXT NOT NULL DEFAULT 'UTC',
   buddy_goals TEXT NOT NULL DEFAULT '',
   interests TEXT NOT NULL DEFAULT '',
+  games TEXT NOT NULL DEFAULT '',
+  hobbies TEXT NOT NULL DEFAULT '',
+  online_offline_preference TEXT NOT NULL DEFAULT 'both' CHECK(online_offline_preference IN ('online','offline','both')),
+  friendship_preference TEXT NOT NULL DEFAULT 'both' CHECK(friendship_preference IN ('temporary','permanent','both')),
   avatar_url TEXT,
   online_status TEXT NOT NULL DEFAULT 'offline',
   safety_level TEXT NOT NULL DEFAULT 'standard',
+  verification_badge TEXT NOT NULL DEFAULT 'none',
   created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
@@ -52,6 +61,8 @@ CREATE TABLE IF NOT EXISTS messages (
   chat_id INTEGER NOT NULL REFERENCES chats(id) ON DELETE CASCADE,
   sender_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   body TEXT NOT NULL,
+  attachment_url TEXT,
+  voice_placeholder INTEGER NOT NULL DEFAULT 0,
   moderation_status TEXT NOT NULL DEFAULT 'pending',
   created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
@@ -59,12 +70,26 @@ CREATE TABLE IF NOT EXISTS messages (
 CREATE TABLE IF NOT EXISTS requests (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   sender_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-  receiver_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  receiver_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
   request_type TEXT NOT NULL DEFAULT 'friend',
+  title TEXT NOT NULL DEFAULT '',
+  description TEXT NOT NULL DEFAULT '',
   message TEXT NOT NULL DEFAULT '',
+  tags TEXT NOT NULL DEFAULT '',
+  category TEXT NOT NULL DEFAULT 'online',
+  mode TEXT NOT NULL DEFAULT 'online' CHECK(mode IN ('online','offline')),
+  reward TEXT NOT NULL DEFAULT '',
   status TEXT NOT NULL DEFAULT 'pending',
   created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS blocks (
+  blocker_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  blocked_user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  reason TEXT NOT NULL DEFAULT '',
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY(blocker_id, blocked_user_id)
 );
 
 CREATE TABLE IF NOT EXISTS reports (
@@ -75,7 +100,9 @@ CREATE TABLE IF NOT EXISTS reports (
   reason TEXT NOT NULL,
   details TEXT NOT NULL DEFAULT '',
   status TEXT NOT NULL DEFAULT 'open',
-  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+  priority TEXT NOT NULL DEFAULT 'normal',
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE IF NOT EXISTS moderation_logs (
@@ -132,7 +159,17 @@ CREATE TABLE IF NOT EXISTS upload_files (
   created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE INDEX IF NOT EXISTS idx_profiles_discovery ON profiles(city, online_status);
+CREATE TABLE IF NOT EXISTS activity_events (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  user_id INTEGER REFERENCES users(id) ON DELETE SET NULL,
+  event_type TEXT NOT NULL,
+  metadata_json TEXT NOT NULL DEFAULT '{}',
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX IF NOT EXISTS idx_profiles_discovery ON profiles(city, district, online_status);
 CREATE INDEX IF NOT EXISTS idx_messages_chat_id ON messages(chat_id, created_at);
 CREATE INDEX IF NOT EXISTS idx_requests_receiver ON requests(receiver_id, status);
+CREATE INDEX IF NOT EXISTS idx_requests_discovery ON requests(category, mode, status);
+CREATE INDEX IF NOT EXISTS idx_reports_status ON reports(status, created_at);
 CREATE INDEX IF NOT EXISTS idx_email_tokens_token ON email_tokens(token);

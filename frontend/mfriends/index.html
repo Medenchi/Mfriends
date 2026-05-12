@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>MFriends — Safe buddy platform</title>
+    <title>MFriends — Safe friendship platform</title>
     <link rel="stylesheet" href="css/styles.css">
   </head>
   <body>
@@ -11,8 +11,9 @@
       <header class="topbar">
         <a class="brand" href="index.html">M<span>Friends</span></a>
         <nav class="nav">
+          <a href="#mission">MISSION</a>
           <a href="#features">SAFETY</a>
-          <a href="#buddy">BUDDIES <span class="nav-tag">NEW</span></a>
+          <a href="#activities">ACTIVITIES</a>
           <a href="login.html">LOGIN</a>
         </nav>
         <a class="chat-cta" href="register.html">● START NOW</a>
@@ -20,11 +21,10 @@
 
       <main>
         <section class="hero">
-          <div class="pixel-orb" aria-hidden="true"></div>
           <div class="hero-content">
-            <div class="eyebrow">SAFE FRIENDSHIP · TEAMMATES · ACTIVITIES</div>
-            <h1>Find trusted friends without dating noise.</h1>
-            <p>MFriends helps people discover gaming buddies, study partners, coding teammates and offline activity friends with verification, trust signals and moderation-first messaging.</p>
+            <div class="eyebrow">FRIENDS · TEAMMATES · SHARED ACTIVITIES</div>
+            <h1>Find trusted people by interests, not dating signals.</h1>
+            <p>MFriends is a safe command center for gaming buddies, coding partners, study groups, walks, events and online/offline friendships.</p>
             <div class="hero-actions">
               <a class="primary" href="register.html">CREATE ACCOUNT</a>
               <a class="secondary" href="#features">VIEW SAFETY MODEL</a>
@@ -32,40 +32,39 @@
           </div>
         </section>
 
+        <section id="mission" class="section">
+          <p class="eyebrow">NOT A DATING APP</p>
+          <h2>Built for friendship-first discovery.</h2>
+          <a class="feature-link" href="register.html"><h3>Gaming, coding, studying and walking buddies</h3><p>Browse people and requests by interests, games, city/district, verified status and online/offline preference.</p></a>
+          <a class="feature-link" href="register.html"><h3>Privacy without realtime GPS</h3><p>Exact location is hidden. Discovery uses city and district only, with safety warnings before offline plans.</p></a>
+          <a class="feature-link" href="register.html"><h3>Rewards with strict boundaries</h3><p>Rewards are allowed only for gaming help, tutoring, coaching and shared tasks — never dating, adult services or paid companionship.</p></a>
+        </section>
+
         <section id="features" class="section">
-          <h2>Production-ready safety architecture.</h2>
+          <p class="eyebrow">PRODUCTION SAFETY ARCHITECTURE</p>
+          <h2>Moderation, verification and trust are core flows.</h2>
           <div class="grid">
-            <article class="card">
-              <span class="pill">MODERATION</span>
-              <h3>External AI hooks</h3>
-              <p>Toxicity, scam, spam and harassment checks are provider-neutral and ready for external APIs.</p>
-            </article>
-            <article class="card">
-              <span class="pill">TRUST</span>
-              <h3>Verification states</h3>
-              <p>Selfie, voice code and liveness placeholders keep sensitive review data temporary and auditable.</p>
-            </article>
-            <article class="card">
-              <span class="pill">REALTIME</span>
-              <h3>P2P video calls</h3>
-              <p>WebRTC media goes peer-to-peer. The VPS only handles signaling over secure WebSockets.</p>
-            </article>
+            <article class="card"><span class="pill">MODERATION</span><h3>External AI hooks</h3><p>Toxicity, scam, spam and harassment detection are provider-neutral and ready for external APIs.</p></article>
+            <article class="card"><span class="pill">TRUST</span><h3>Verification queue</h3><p>Selfie, voice code and liveness placeholders store temporary review data with auto-delete windows.</p></article>
+            <article class="card"><span class="pill">REALTIME</span><h3>P2P video calls</h3><p>WebRTC media stays browser-to-browser. The VPS only handles signaling through secure WebSockets.</p></article>
           </div>
         </section>
 
-        <section id="buddy" class="section">
+        <section id="activities" class="section">
+          <p class="eyebrow">ONLINE + OFFLINE</p>
+          <h2>Create requests for safe shared activities.</h2>
           <div class="grid">
-            <div>
-              <p class="eyebrow">NOT A DATING APP</p>
-              <h2>Built for gaming, study, coding and real-world activities.</h2>
-            </div>
-            <div class="card">
-              <p class="mono">/api → FastAPI REST<br>/ws → chat + WebRTC signaling<br>/uploads → secure files<br>/mfriends → static frontend</p>
-              <a class="ghost" href="register.html">JOIN MFRIENDS</a>
-            </div>
+            <article class="card"><h3>Online</h3><p>Gaming, coding, studying, watch together and language practice.</p></article>
+            <article class="card"><h3>Offline</h3><p>Walking, sports, cafes, board games and public events.</p></article>
+            <article class="card"><h3>Operations</h3><p>FastAPI, SQLite WAL, WebSockets, Nginx virtual hosts and 512 MB VPS deployment scripts.</p></article>
           </div>
         </section>
       </main>
+
+      <footer class="section footer">
+        <span class="footer-link">mail@denchy.cyou</span>
+        <span class="footer-link">mfriends.denchy.cyou · api.denchy.cyou · ws.denchy.cyou · cdn.denchy.cyou</span>
+      </footer>
     </div>
   </body>
 </html>

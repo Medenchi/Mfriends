@@ -10,12 +10,42 @@ SAFE_UPLOAD_TYPES = {
     "audio/webm": ".webm",
     "audio/mpeg": ".mp3",
 }
+REWARD_ALLOWED_CATEGORIES = {"gaming", "coding", "studying", "tutoring", "coaching", "task"}
+REWARD_FORBIDDEN_TERMS = {
+    "dating",
+    "date",
+    "escort",
+    "adult",
+    "companionship",
+    "girlfriend",
+    "boyfriend",
+    "romance",
+    "sex",
+}
 
 
 def ensure_safe_text(value: str, max_length: int = 2000) -> str:
     cleaned = " ".join(value.strip().split())
     if len(cleaned) > max_length:
         raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="Text too long")
+    return cleaned
+
+
+def validate_reward(reward: str, category: str, text: str) -> str:
+    cleaned = ensure_safe_text(reward, 120)
+    if not cleaned:
+        return ""
+    lower_context = f"{category} {text} {cleaned}".lower()
+    if category.lower() not in REWARD_ALLOWED_CATEGORIES:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail="Rewards are only allowed for gaming help, tutoring, coaching and shared tasks",
+        )
+    if any(term in lower_context for term in REWARD_FORBIDDEN_TERMS):
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail="Rewards for dating, adult services or paid companionship are forbidden",
+        )
     return cleaned
 
 

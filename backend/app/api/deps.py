@@ -18,3 +18,13 @@ def current_user_id(
     if not user or not user["is_active"]:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Inactive user")
     return int(user["id"])
+
+
+def current_admin_id(
+    user_id: int = Depends(current_user_id),
+    db: Connection = Depends(get_db),
+) -> int:
+    user = db.execute("SELECT role FROM users WHERE id = ?", (user_id,)).fetchone()
+    if not user or user["role"] not in {"admin", "moderator"}:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Admin access required")
+    return user_id

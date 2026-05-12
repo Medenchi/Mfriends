@@ -4,6 +4,7 @@ const state = {
   currentChatId: null,
   peer: null,
   localStream: null,
+  typingTimer: null,
 };
 
 function $(selector) {
@@ -11,7 +12,7 @@ function $(selector) {
 }
 
 function htmlEscape(value) {
-  return String(value)
+  return String(value ?? "")
     .replaceAll("&", "&amp;")
     .replaceAll("<", "&lt;")
     .replaceAll(">", "&gt;")
@@ -28,27 +29,45 @@ function setView(viewId) {
 async function loadMe() {
   state.me = await api("/profiles/me");
   $("#profile-name").value = state.me.display_name || "";
+  $("#profile-username").value = state.me.username || "";
   $("#profile-bio").value = state.me.bio || "";
   $("#profile-city").value = state.me.city || "";
+  $("#profile-district").value = state.me.district || "";
+  $("#profile-mode").value = state.me.online_offline_preference || "both";
+  $("#profile-friendship").value = state.me.friendship_preference || "both";
   $("#profile-goals").value = state.me.buddy_goals || "";
   $("#profile-interests").value = state.me.interests || "";
+  $("#profile-games").value = state.me.games || "";
+  $("#profile-hobbies").value = state.me.hobbies || "";
+  $("#avatar-preview").src = state.me.avatar_url || "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80'%3E%3Crect width='80' height='80' fill='%23272735'/%3E%3Ctext x='40' y='48' fill='%23ededf3' text-anchor='middle' font-size='24'%3EM%3C/text%3E%3C/svg%3E";
   $("#me-summary").innerHTML = `
     <span class="pill">TRUST ${state.me.trust_score || 50}/100</span>
-    <p>${htmlEscape(state.me.email)} · ${state.me.is_email_verified ? "verified" : "email pending"}</p>
+    <span class="pill">${htmlEscape(state.me.verification_badge || "none")}</span>
+    <p>${htmlEscape(state.me.email)} · ${state.me.is_email_verified ? "verified" : "email pending"} · role ${htmlEscape(state.me.role)}</p>
   `;
 }
 
 async function loadPeople() {
-  const query = $("#people-query").value;
-  const data = await api(`/profiles/discover?q=${encodeURIComponent(query)}`);
+  const params = new URLSearchParams({
+    q: $("#people-query").value,
+    interests: $("#people-interests").value,
+    games: $("#people-games").value,
+    city: $("#people-city").value,
+    district: $("#people-district").value,
+    mode: $("#people-mode").value,
+    verified_only: $("#people-verified").checked ? "true" : "false",
+  });
+  const data = await api(`/profiles/discover?${params}`);
   $("#people-list").innerHTML = data.people.map((person) => `
     <article class="person">
       <div class="row">
         <h3>${htmlEscape(person.display_name)}</h3>
-        <span class="pill">${htmlEscape(person.online_status)}</span>
+        <span class="pill">${htmlEscape(person.online_offline_preference)}</span>
+        <span class="pill">trust ${person.trust_score || 50}</span>
       </div>
       <p>${htmlEscape(person.bio || "No bio yet")}</p>
-      <p class="mono">${htmlEscape(person.city || "remote")} · trust ${person.trust_score || 50}</p>
+      <p class="mono">${htmlEscape(person.city || "remote")} ${person.district ? "· " + htmlEscape(person.district) : ""} · ${htmlEscape(person.verification_badge || "no badge")}</p>
+      <p>${htmlEscape([person.interests, person.games, person.hobbies].filter(Boolean).join(" · "))}</p>
       <button class="ghost" data-request="${person.user_id}">SEND REQUEST</button>
     </article>
   `).join("");
@@ -58,10 +77,10 @@ async function loadRequests() {
   const data = await api("/requests");
   $("#request-list").innerHTML = data.requests.map((request) => `
     <article class="request">
-      <h3>${htmlEscape(request.sender_name || `User #${request.sender_id}`)}</h3>
-      <p>${htmlEscape(request.message)}</p>
-      <p class="mono">${htmlEscape(request.request_type)} · ${htmlEscape(request.status)}</p>
-      ${request.receiver_id === state.me.user_id && request.status === "pending" ? `
+      <div class="row"><h3>${htmlEscape(request.title || request.sender_name || `User #${request.sender_id}`)}</h3><span class="pill">${htmlEscape(request.mode)}</span><span class="pill">${htmlEscape(request.category)}</span></div>
+      <p>${htmlEscape(request.description || request.message)}</p>
+      <p class="mono">${htmlEscape(request.tags)} · ${htmlEscape(request.status)} ${request.reward ? "· reward: " + htmlEscape(request.reward) : ""}</p>
+      ${request.sender_id !== state.me.user_id && request.status === "pending" ? `
         <button class="primary" data-answer="${request.id}:accepted">ACCEPT</button>
         <button class="secondary" data-answer="${request.id}:declined">DECLINE</button>
       ` : ""}
@@ -72,7 +91,7 @@ async function loadRequests() {
 async function loadChats() {
   const data = await api("/chats");
   $("#chat-list").innerHTML = data.chats.map((chat) => `
-    <button class="ghost" data-chat="${chat.id}">CHAT #${chat.id}</button>
+    <button class="ghost" data-chat="${chat.id}">CHAT #${chat.id} · ${htmlEscape(chat.members || "members")}</button>
   `).join("");
 }
 
@@ -84,6 +103,8 @@ async function openChat(chatId) {
     <div class="message ${message.sender_id === state.me.user_id ? "mine" : ""}">
       <strong>${htmlEscape(message.sender_name)}</strong>
       <p>${htmlEscape(message.body)}</p>
+      ${message.attachment_url ? `<img class="attachment-preview" src="${htmlEscape(message.attachment_url)}" alt="attachment">` : ""}
+      ${message.voice_placeholder ? `<p class="notice">Voice message placeholder</p>` : ""}
       <span class="mono">${htmlEscape(message.moderation_status)}</span>
     </div>
   `).join("");
@@ -97,6 +118,9 @@ function connectSocket() {
     if (message.event === "chat.message" && Number(message.chat_id) === state.currentChatId) {
       await openChat(state.currentChatId);
     }
+    if (message.event === "chat.typing" && Number(message.chat_id) === state.currentChatId && Number(message.from) !== state.me.user_id) {
+      $("#typing-status").textContent = message.is_typing ? `User #${message.from} is typing...` : "";
+    }
     if (message.event.startsWith("webrtc.")) {
       await handleSignal(message);
     }
@@ -107,12 +131,25 @@ async function sendChatMessage(event) {
   event.preventDefault();
   const body = $("#message-body").value.trim();
   if (!body || !state.currentChatId) return;
+  let attachmentUrl = null;
+  const file = $("#message-image").files[0];
+  if (file) {
+    const uploaded = await upload("/uploads", file);
+    attachmentUrl = uploaded.url;
+  }
   await api(`/chats/${state.currentChatId}/messages`, {
     method: "POST",
-    body: JSON.stringify({ chat_id: state.currentChatId, body }),
+    body: JSON.stringify({
+      chat_id: state.currentChatId,
+      body,
+      attachment_url: attachmentUrl,
+      voice_placeholder: $("#voice-placeholder").checked,
+    }),
   });
   state.socket?.send(JSON.stringify({ event: "chat.message", chat_id: state.currentChatId, body }));
   $("#message-body").value = "";
+  $("#message-image").value = "";
+  $("#voice-placeholder").checked = false;
   await openChat(state.currentChatId);
 }
 
@@ -177,11 +214,32 @@ async function handleSignal(message) {
   }
 }
 
+async function loadSafetySummary() {
+  const data = await api("/moderation/safety-summary");
+  $("#safety-summary").innerHTML = `
+    <article class="admin-card"><h3>Trust</h3><pre>${htmlEscape(JSON.stringify(data.trust_score, null, 2))}</pre></article>
+    <article class="admin-card"><h3>Warnings</h3>${data.warnings.map((warning) => `<p>${htmlEscape(warning)}</p>`).join("")}</article>
+    <article class="admin-card"><h3>Recent moderation</h3><pre>${htmlEscape(JSON.stringify(data.recent, null, 2))}</pre></article>
+  `;
+}
+
+async function loadAdmin() {
+  const [queue, analytics] = await Promise.all([api("/moderation/admin/queue"), api("/moderation/admin/analytics")]);
+  $("#admin-content").innerHTML = `
+    <article class="admin-card"><h3>Analytics</h3><pre>${htmlEscape(JSON.stringify(analytics, null, 2))}</pre></article>
+    <article class="admin-card"><h3>Reports</h3><pre>${htmlEscape(JSON.stringify(queue.reports, null, 2))}</pre></article>
+    <article class="admin-card"><h3>Suspicious users</h3><pre>${htmlEscape(JSON.stringify(queue.suspicious_users, null, 2))}</pre></article>
+    <article class="admin-card"><h3>AI logs</h3><pre>${htmlEscape(JSON.stringify(queue.ai_moderation_logs, null, 2))}</pre></article>
+    <article class="admin-card"><h3>Verification review</h3><pre>${htmlEscape(JSON.stringify(queue.verification_review, null, 2))}</pre></article>
+  `;
+}
+
 function bindApp() {
   document.querySelectorAll(".sidebar a").forEach((link) => {
-    link.addEventListener("click", (event) => {
+    link.addEventListener("click", async (event) => {
       event.preventDefault();
       setView(link.dataset.view);
+      if (link.dataset.view === "safety") await loadSafetySummary();
     });
   });
   $("#discover-form").addEventListener("submit", async (event) => {
@@ -194,12 +252,24 @@ function bindApp() {
       method: "PUT",
       body: JSON.stringify({
         display_name: $("#profile-name").value,
+        username: $("#profile-username").value,
         bio: $("#profile-bio").value,
         city: $("#profile-city").value,
+        district: $("#profile-district").value,
         buddy_goals: $("#profile-goals").value,
         interests: $("#profile-interests").value,
+        games: $("#profile-games").value,
+        hobbies: $("#profile-hobbies").value,
+        online_offline_preference: $("#profile-mode").value,
+        friendship_preference: $("#profile-friendship").value,
       }),
     });
+    await loadMe();
+  });
+  $("#avatar-file").addEventListener("change", async () => {
+    const file = $("#avatar-file").files[0];
+    if (!file) return;
+    await upload("/uploads/avatar", file);
     await loadMe();
   });
   $("#people-list").addEventListener("click", async (event) => {
@@ -207,8 +277,26 @@ function bindApp() {
     if (!userId) return;
     await api("/requests", {
       method: "POST",
-      body: JSON.stringify({ receiver_id: Number(userId), request_type: "friend", message: "Let’s connect on MFriends." }),
+      body: JSON.stringify({ receiver_id: Number(userId), request_type: "friend", title: "Friend request", message: "Let’s connect on MFriends." }),
     });
+    await loadRequests();
+    setView("requests");
+  });
+  $("#request-form").addEventListener("submit", async (event) => {
+    event.preventDefault();
+    await api("/requests", {
+      method: "POST",
+      body: JSON.stringify({
+        title: $("#request-title").value,
+        description: $("#request-description").value,
+        message: $("#request-description").value,
+        category: $("#request-category").value,
+        mode: $("#request-mode").value,
+        tags: $("#request-tags").value,
+        reward: $("#request-reward").value,
+      }),
+    });
+    event.target.reset();
     await loadRequests();
   });
   $("#request-list").addEventListener("click", async (event) => {
@@ -223,8 +311,31 @@ function bindApp() {
     const chatId = event.target.dataset.chat;
     if (chatId) await openChat(Number(chatId));
   });
+  $("#message-body").addEventListener("input", () => {
+    if (!state.currentChatId) return;
+    state.socket?.send(JSON.stringify({ event: "chat.typing", chat_id: state.currentChatId, is_typing: true }));
+    clearTimeout(state.typingTimer);
+    state.typingTimer = setTimeout(() => state.socket?.send(JSON.stringify({ event: "chat.typing", chat_id: state.currentChatId, is_typing: false })), 900);
+  });
   $("#message-form").addEventListener("submit", sendChatMessage);
   $("#call-start").addEventListener("click", startCall);
+  document.querySelectorAll("[data-verify]").forEach((button) => {
+    button.addEventListener("click", async () => {
+      const result = await api("/verification/start", { method: "POST", body: JSON.stringify({ verification_type: button.dataset.verify }) });
+      $("#verification-result").textContent = JSON.stringify(result, null, 2);
+    });
+  });
+  $("#report-form").addEventListener("submit", async (event) => {
+    event.preventDefault();
+    await api("/moderation/reports", { method: "POST", body: JSON.stringify({ reported_user_id: Number($("#report-user-id").value), reason: $("#report-reason").value, details: $("#report-details").value }) });
+    await loadSafetySummary();
+  });
+  $("#block-form").addEventListener("submit", async (event) => {
+    event.preventDefault();
+    await api("/moderation/blocks", { method: "POST", body: JSON.stringify({ blocked_user_id: Number($("#block-user-id").value), reason: "Blocked from safety panel" }) });
+    await loadSafetySummary();
+  });
+  $("#admin-load").addEventListener("click", loadAdmin);
   $("#logout").addEventListener("click", () => {
     session.clear();
     location.href = "login.html";

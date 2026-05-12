@@ -1,24 +1,6 @@
 # MFriends
 
-MFriends is a production-oriented, low-RAM platform for finding friends, teammates and activity buddies. It is not a dating app.
-
-The project is designed for a single domain:
-
-```text
-malinacode.is-a.dev
-├── /mfriends   static frontend
-├── /api        FastAPI REST API
-├── /ws         WebSocket chat + WebRTC signaling
-└── /uploads    protected/static uploaded files
-```
-
-This is safe for a shared domain with multiple projects because MFriends is scoped to `/mfriends/` and its backend paths. It does not require or reserve additional subdomains.
-
-Dynamic DNS is expected to use:
-
-```text
-malinacode.is-a.dev CNAME → malinacode.duckdns.org → current VPS IP
-```
+MFriends is a production-oriented, low-RAM fullstack platform for finding friends, teammates and activity buddies. It is not a dating app.
 
 ## Stack
 
@@ -27,8 +9,21 @@ malinacode.is-a.dev CNAME → malinacode.duckdns.org → current VPS IP
 - Database: SQLite
 - Realtime: WebSocket
 - Video calls: WebRTC P2P signaling only
-- Reverse proxy: Nginx
+- Reverse proxy: Nginx virtual hosts
 - Hosting target: small VPS with 512 MB RAM
+
+## Domains
+
+Use wildcard DNS for `*.denchy.cyou`:
+
+```text
+mfriends.denchy.cyou → static frontend
+api.denchy.cyou      → FastAPI REST API
+ws.denchy.cyou       → WebSocket chat + WebRTC signaling
+cdn.denchy.cyou      → uploads/static files
+mail.denchy.cyou     → email services for mail@denchy.cyou
+dev.denchy.cyou      → protected development environment
+```
 
 ## Local development
 
@@ -64,21 +59,22 @@ See:
 - `docs/DEPLOYMENT.md`
 - `deploy/nginx/mfriends.conf`
 - `deploy/systemd/mfriends-api.service`
-- `deploy/systemd/duckdns-mfriends.service`
-- `deploy/systemd/duckdns-mfriends.timer`
 
 ## Security model
 
 This repository includes:
 
-- JWT access tokens and refresh tokens
+- JWT access and refresh tokens
 - password hashing
 - email verification and password reset flows
 - rate limiting and anti-spam checks
 - upload validation
 - moderation hooks for external APIs
-- report and trust-score storage
+- report, block and trust-score storage
 - WebSocket authentication
+- typing indicators and realtime messaging
 - WebRTC signaling without relaying media through the VPS
+- verification placeholders with temporary storage and auto-delete windows
+- admin moderation queue, suspicious users, analytics and AI moderation logs
 
 AI moderation hooks are intentionally provider-neutral. Configure an external moderation API in environment variables; no local AI model is required.
