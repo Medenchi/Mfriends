@@ -1,5 +1,5 @@
-const API_BASE = window.MFRIENDS_API_BASE || "/api";
-const WS_BASE = window.MFRIENDS_WS_BASE || `${location.protocol === "https:" ? "wss" : "ws"}://${location.host}/ws`;
+const API_BASE = window.MFRIENDS_API_BASE || (location.hostname === "mfriends.denchy.cyou" ? "https://api.denchy.cyou" : "/api");
+const WS_BASE = window.MFRIENDS_WS_BASE || (location.hostname === "mfriends.denchy.cyou" ? "wss://ws.denchy.cyou/ws" : `${location.protocol === "https:" ? "wss" : "ws"}://${location.host}/ws`);
 
 const session = {
   get token() {
@@ -53,6 +53,8 @@ async function upload(path, file) {
 function bindAuthForms() {
   const registerForm = document.querySelector("#register-form");
   const loginForm = document.querySelector("#login-form");
+  const resetRequestForm = document.querySelector("#reset-request-form");
+  const resetConfirmForm = document.querySelector("#reset-confirm-form");
   if (registerForm) {
     registerForm.addEventListener("submit", async (event) => {
       event.preventDefault();
@@ -77,6 +79,24 @@ function bindAuthForms() {
       session.token = result.access_token;
       localStorage.setItem("mfriends_refresh_token", result.refresh_token);
       location.href = "app.html";
+    });
+  }
+  if (resetRequestForm) {
+    resetRequestForm.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      const form = new FormData(resetRequestForm);
+      await api("/auth/password-reset/request", { method: "POST", body: JSON.stringify(Object.fromEntries(form.entries())) });
+      document.querySelector("#reset-status").textContent = "If the account exists, an email was sent.";
+    });
+  }
+  if (resetConfirmForm) {
+    resetConfirmForm.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      const form = new FormData(resetConfirmForm);
+      const payload = Object.fromEntries(form.entries());
+      payload.token = new URLSearchParams(location.search).get("token") || payload.token;
+      await api("/auth/password-reset/confirm", { method: "POST", body: JSON.stringify(payload) });
+      document.querySelector("#reset-status").textContent = "Password updated. You can log in.";
     });
   }
 }

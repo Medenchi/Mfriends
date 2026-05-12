@@ -33,6 +33,16 @@ async def websocket_endpoint(websocket: WebSocket):
                         "body": message.get("body", ""),
                     },
                 )
+            elif event == "chat.typing":
+                await manager.send_to_chat(
+                    int(message["chat_id"]),
+                    {
+                        "event": "chat.typing",
+                        "chat_id": int(message["chat_id"]),
+                        "from": user_id,
+                        "is_typing": bool(message.get("is_typing", True)),
+                    },
+                )
             elif event in {"webrtc.offer", "webrtc.answer", "webrtc.ice"}:
                 await manager.send_to_user(
                     int(message["to_user_id"]),

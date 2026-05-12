@@ -15,10 +15,14 @@ router = APIRouter(prefix="/chats", tags=["chats"])
 def list_chats(user_id: int = Depends(current_user_id), db: Connection = Depends(get_db)):
     rows = db.execute(
         """
-        SELECT c.id, c.chat_type, c.title, c.created_at
+        SELECT c.id, c.chat_type, c.title, c.created_at,
+               GROUP_CONCAT(p.display_name, ', ') AS members
         FROM chats c
         JOIN chat_members cm ON cm.chat_id = c.id
+        JOIN chat_members all_members ON all_members.chat_id = c.id
+        JOIN profiles p ON p.user_id = all_members.user_id
         WHERE cm.user_id = ?
+        GROUP BY c.id
         ORDER BY c.created_at DESC
         """,
         (user_id,),
@@ -40,7 +44,8 @@ def list_messages(
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not a member")
     rows = db.execute(
         """
-        SELECT m.id, m.sender_id, p.display_name AS sender_name, m.body, m.moderation_status, m.created_at
+        SELECT m.id, m.sender_id, p.display_name AS sender_name, m.body, m.attachment_url,
+               m.voice_placeholder, m.moderation_status, m.created_at
         FROM messages m
         JOIN profiles p ON p.user_id = m.sender_id
         WHERE m.chat_id = ?
@@ -69,14 +74,25 @@ async def send_message(
     ).fetchone()
     if not member:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not a member")
+    blocked = db.execute(
+        """
+        SELECT 1 FROM chat_members cm
+        JOIN blocks b ON (b.blocked_user_id = cm.user_id AND b.blocker_id = ?)
+                     OR (b.blocker_id = cm.user_id AND b.blocked_user_id = ?)
+        WHERE cm.chat_id = ?
+        """,
+        (user_id, user_id, chat_id),
+    ).fetchone()
+    if blocked:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Chat is blocked by safety controls")
     body = ensure_safe_text(payload.body, 2000)
     decision = await moderate_text(body)
     cursor = db.execute(
         """
-        INSERT INTO messages (chat_id, sender_id, body, moderation_status)
-        VALUES (?, ?, ?, ?)
+        INSERT INTO messages (chat_id, sender_id, body, attachment_url, voice_placeholder, moderation_status)
+        VALUES (?, ?, ?, ?, ?, ?)
         """,
-        (chat_id, user_id, body, decision.decision),
+        (chat_id, user_id, body, payload.attachment_url, int(payload.voice_placeholder), decision.decision),
     )
     message_id = int(cursor.lastrowid)
     log_moderation(db, user_id, "message", message_id, decision)

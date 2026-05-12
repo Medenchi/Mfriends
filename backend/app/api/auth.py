@@ -5,6 +5,7 @@ from backend.app.api.schemas import (
     LoginRequest,
     PasswordResetConfirm,
     PasswordResetRequest,
+    RefreshRequest,
     RegisterRequest,
     TokenResponse,
 )
@@ -12,6 +13,7 @@ from backend.app.core.rate_limit import rate_limit
 from backend.app.core.security import (
     create_access_token,
     create_refresh_token,
+    decode_token,
     hash_password,
     verify_password,
 )
@@ -20,6 +22,13 @@ from backend.app.services.email import send_password_reset_email, send_verificat
 from fastapi import APIRouter, Depends, HTTPException, Request, status
 
 router = APIRouter(prefix="/auth", tags=["auth"])
+
+
+def issue_tokens(user_id: int) -> TokenResponse:
+    return TokenResponse(
+        access_token=create_access_token(str(user_id)),
+        refresh_token=create_refresh_token(str(user_id)),
+    )
 
 
 @router.post("/register", response_model=TokenResponse, status_code=status.HTTP_201_CREATED)
@@ -33,20 +42,21 @@ async def register(payload: RegisterRequest, request: Request, db: Connection = 
         user_id = int(cursor.lastrowid)
         db.execute(
             """
-            INSERT INTO profiles (user_id, display_name, buddy_goals)
-            VALUES (?, ?, 'friendship, study buddy, gaming buddy, coding buddy')
+            INSERT INTO profiles (user_id, display_name, username, buddy_goals)
+            VALUES (?, ?, ?, 'friendship, study buddy, gaming buddy, coding buddy')
             """,
-            (user_id, payload.display_name.strip()),
+            (user_id, payload.display_name.strip(), payload.display_name.lower().strip().replace(" ", "-")),
         )
         db.execute("INSERT INTO trust_scores (user_id) VALUES (?)", (user_id,))
+        db.execute(
+            "INSERT INTO activity_events (user_id, event_type, metadata_json) VALUES (?, 'register', '{}')",
+            (user_id,),
+        )
         db.commit()
     except IntegrityError as exc:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Email already exists") from exc
     await send_verification_email(db, user_id, payload.email.lower())
-    return TokenResponse(
-        access_token=create_access_token(str(user_id)),
-        refresh_token=create_refresh_token(str(user_id)),
-    )
+    return issue_tokens(user_id)
 
 
 @router.post("/login", response_model=TokenResponse)
@@ -60,10 +70,24 @@ def login(payload: LoginRequest, request: Request, db: Connection = Depends(get_
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials")
     if not user["is_active"]:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Account disabled")
-    return TokenResponse(
-        access_token=create_access_token(str(user["id"])),
-        refresh_token=create_refresh_token(str(user["id"])),
+    db.execute("UPDATE users SET last_login_at = CURRENT_TIMESTAMP WHERE id = ?", (user["id"],))
+    db.execute(
+        "INSERT INTO activity_events (user_id, event_type, metadata_json) VALUES (?, 'login', '{}')",
+        (user["id"],),
     )
+    db.commit()
+    return issue_tokens(int(user["id"]))
+
+
+@router.post("/refresh", response_model=TokenResponse)
+def refresh(payload: RefreshRequest, db: Connection = Depends(get_db)):
+    subject = decode_token(payload.refresh_token, expected_type="refresh")
+    if not subject:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid refresh token")
+    user = db.execute("SELECT id, is_active FROM users WHERE id = ?", (int(subject),)).fetchone()
+    if not user or not user["is_active"]:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Inactive user")
+    return issue_tokens(int(user["id"]))
 
 
 @router.get("/verify-email")
@@ -79,6 +103,10 @@ def verify_email(token: str, db: Connection = Depends(get_db)):
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid or expired token")
     db.execute("UPDATE users SET is_email_verified = 1, updated_at = CURRENT_TIMESTAMP WHERE id = ?", (row["user_id"],))
     db.execute("UPDATE email_tokens SET used_at = CURRENT_TIMESTAMP WHERE id = ?", (row["id"],))
+    db.execute(
+        "UPDATE profiles SET verification_badge = 'email' WHERE user_id = ? AND verification_badge = 'none'",
+        (row["user_id"],),
+    )
     db.commit()
     return {"status": "verified"}
 

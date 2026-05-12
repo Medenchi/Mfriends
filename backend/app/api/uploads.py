@@ -18,3 +18,17 @@ async def upload_file(
 ):
     rate_limit(request, f"upload-{user_id}", limit=20, window_seconds=3600)
     return await save_upload(db, user_id, file)
+
+
+@router.post("/avatar")
+async def upload_avatar(
+    request: Request,
+    file: UploadFile = File(...),
+    user_id: int = Depends(current_user_id),
+    db: Connection = Depends(get_db),
+):
+    rate_limit(request, f"avatar-{user_id}", limit=6, window_seconds=3600)
+    saved = await save_upload(db, user_id, file)
+    db.execute("UPDATE profiles SET avatar_url = ?, updated_at = CURRENT_TIMESTAMP WHERE user_id = ?", (saved["url"], user_id))
+    db.commit()
+    return saved

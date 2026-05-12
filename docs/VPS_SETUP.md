@@ -20,35 +20,21 @@ echo '/swapfile none swap sw 0 0' | sudo tee -a /etc/fstab
 
 ## DNS architecture
 
-1. Create DuckDNS domain: `malinacode.duckdns.org`.
-2. Add CNAME in `is-a.dev` config:
+Create a wildcard DNS record:
 
-```json
-{
-  "owner": {
-    "username": "Medenchi",
-    "email": "atem4513@gmail.com"
-  },
-  "record": {
-    "CNAME": "malinacode.duckdns.org"
-  }
-}
+```text
+*.denchy.cyou A <VPS-IP>
+denchy.cyou A <VPS-IP>
 ```
 
-3. Set `/opt/mfriends/.env`:
+Subdomains are routed by Nginx virtual hosts:
 
-```bash
-DUCKDNS_DOMAIN=malinacode
-DUCKDNS_TOKEN=your-duckdns-token
-```
-
-4. Enable updater:
-
-```bash
-sudo systemctl enable --now duckdns-mfriends.timer
-```
-
-The timer runs every 5 minutes, retries failed updates and logs to `/opt/mfriends/logs/duckdns.log`.
+- `mfriends.denchy.cyou` frontend
+- `api.denchy.cyou` FastAPI
+- `ws.denchy.cyou` WebSockets/WebRTC signaling
+- `cdn.denchy.cyou` uploads/static
+- `mail.denchy.cyou` email services
+- `dev.denchy.cyou` protected development environment
 
 ## Firewall
 
@@ -66,3 +52,17 @@ sudo ufw enable
 - WebRTC media stays peer-to-peer
 - no local AI models
 - upload limit defaults to 5 MB
+- no React/Next.js/Kubernetes/microservices
+
+## Email
+
+Configure your mail provider or local mail stack so `mail@denchy.cyou` can send SMTP mail. Store SMTP credentials in `/opt/mfriends/.env` only.
+
+## Dev host
+
+`dev.denchy.cyou` is protected with Nginx basic auth. Create the password file before enabling the config:
+
+```bash
+sudo apt-get install -y apache2-utils
+sudo htpasswd -c /etc/nginx/.mfriends-dev.htpasswd devin
+```
